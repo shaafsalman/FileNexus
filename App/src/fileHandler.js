@@ -10,119 +10,61 @@ class FileHandler {
     }
 
     async initializeDirectories() {
-        const dirs = ['pdf', 'word'];
+        const dirs = ['uploads', 'temp'];
         for (const dir of dirs) {
             await fs.mkdir(path.join(this.basePath, dir), { recursive: true });
         }
     }
 
     generateUniqueId() {
-        return crypto.randomBytes(32).toString('hex');
+        const timestamp = new Date().getTime();
+        const random = Math.random().toString(36).substring(2, 15);
+        return `${timestamp}-${random}`;
     }
 
-    getFileType(mimeType) {
-        if (mimeType === 'application/pdf') return 'pdf';
-        if (mimeType === 'application/msword' || 
-            mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-            return 'word';
-        }
-        throw new Error('Unsupported file type');
-    }
-
-    async saveFile(file, customFolder = '') {
-        const fileType = this.getFileType(file.mimetype);
+    async saveFile(file) {
         const uniqueId = this.generateUniqueId();
         const fileExtension = path.extname(file.originalname);
         const fileName = `${uniqueId}${fileExtension}`;
-        
-        let filePath;
-        if (customFolder) {
-            const folderPath = path.join(this.basePath, fileType, customFolder);
-            await fs.mkdir(folderPath, { recursive: true });
-            filePath = path.join(folderPath, fileName);
-        } else {
-            filePath = path.join(this.basePath, fileType, fileName);
-        }
+        const filePath = path.join(this.basePath, 'uploads', fileName);
 
-        // Move file from temp upload to final location
+        // Move file from temp to uploads directory
         await fs.rename(file.path, filePath);
 
-        // Create a shorter access token for the URL
-        const accessToken = crypto.randomBytes(16).toString('hex');
-
-        // Store file metadata in a JSON file
+        // Store file metadata
         const metadata = {
+            id: uniqueId,
             originalName: file.originalname,
-            fileName,
-            accessToken,
-            filePath,
+            fileName: fileName,
             mimeType: file.mimetype,
             size: file.size,
-            uploadDate: new Date().toISOString(),
-            customFolder
+            uploadDate: new Date().toISOString()
         };
 
-        const metadataPath = `${filePath}.meta.json`;
-        await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+        await fs.writeFile(
+            path.join(this.basePath, 'uploads', `${uniqueId}.json`),
+            JSON.stringify(metadata)
+        );
 
         return {
-            accessToken,
-            fileName,
+            id: uniqueId,
+            fileName: fileName,
             originalName: file.originalname
         };
     }
 
-    async getFileByToken(accessToken) {
-        const directories = ['pdf', 'word'];
-        
-        for (const dir of directories) {
-            const basePath = path.join(this.basePath, dir);
-            const files = await this.getAllFilesRecursively(basePath);
-            
-            for (const file of files) {
-                if (file.endsWith('.meta.json')) {
-                    const metadataContent = await fs.readFile(file, 'utf8');
-                    const metadata = JSON.parse(metadataContent);
-                    
-                    if (metadata.accessToken === accessToken) {
-                        const filePath = metadata.filePath;
-                        if (await this.fileExists(filePath)) {
-                            return {
-                                path: filePath,
-                                originalName: metadata.originalName,
-                                mimeType: metadata.mimeType
-                            };
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    async getAllFilesRecursively(dir) {
-        const files = await fs.readdir(dir, { withFileTypes: true });
-        const allFiles = [];
-        
-        for (const file of files) {
-            const fullPath = path.join(dir, file.name);
-            if (file.isDirectory()) {
-                const subFiles = await this.getAllFilesRecursively(fullPath);
-                allFiles.push(...subFiles);
-            } else {
-                allFiles.push(fullPath);
-            }
-        }
-        
-        return allFiles;
-    }
-
-    async fileExists(filePath) {
+    async getFile(fileId) {
         try {
-            await fs.access(filePath);
-            return true;
-        } catch {
-            return false;
+            const metadataPath = path.join(this.basePath, 'uploads', `${fileId}.json`);
+            const metadata = JSON.parse(await fs.readFile(metadataPath, 'utf8'));
+            const filePath = path.join(this.basePath, 'uploads', metadata.fileName);
+
+            return {
+                ...metadata,
+                path: filePath
+            };
+        } catch (error) {
+            return null;
         }
     }
 }
