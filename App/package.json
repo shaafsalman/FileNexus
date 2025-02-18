@@ -1,0 +1,13 @@
+{
+    "name": "file-host",
+    "version": "1.0.0",
+    "description": "File hosting system",
+    "main": "app.js",
+    "scripts": {
+      "start": "node app.js",
+      "dev": "nodemon app.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+  }
