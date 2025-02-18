@@ -18,14 +18,12 @@ jobs:
 
     - name: Deploy to server
       env:
-        HOSTINGER_HOST: ${{ secrets.HOSTINGER_HOST }}
-        HOSTINGER_USER: ${{ secrets.HOSTINGER_USER }}
-        HOSTINGER_PASSWORD: ${{ secrets.HOSTINGER_PASSWORD }}
+        HOSTINGER_HOST: ${{ secrets.hostinger_host }}
+        HOSTINGER_USER: ${{ secrets.hostinger_user }}
+        HOSTINGER_PASSWORD: ${{ secrets.hostinger_password }}
       run: |
-        sshpass -p "$HOSTINGER_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $HOSTINGER_USER@$HOSTINGER_HOST '
-          cd projects &&
-          cd VPS-File-Host &&
-          git pull &&
-          npm install &&
+        sshpass -p "$HOSTINGER_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $HOSTINGER_USER@$HOSTINGER_HOST << 'EOF'
+          cd projects/VPS-File-Host 
+          git pull
           pm2 restart file-host
-        '
+        EOF
