@@ -25,7 +25,7 @@ jobs:
         sshpass -p "$HOSTINGER_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $HOSTINGER_USER@$HOSTINGER_HOST << 'EOF'
           # Navigate to backend directory, pull the latest changes
           cd projects
-          cd VPS-File-Host
+          cd File-Host
           git pull
 
         EOF
