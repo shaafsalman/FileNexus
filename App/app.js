@@ -34,7 +34,7 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Something broke!' });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 1001;
 app.listen(PORT, () => {
     logger.success(`Server running on port ${PORT}`);
     logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
