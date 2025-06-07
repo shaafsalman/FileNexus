@@ -17,7 +17,12 @@ module.exports = {
         allowedMimeTypes: [
             'application/pdf', 
             'application/msword', 
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/gif',
+            'image/webp'
         ],
 
         // Storage paths

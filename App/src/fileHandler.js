@@ -28,10 +28,8 @@ class FileHandler {
         const fileName = `${uniqueId}${fileExtension}`;
         const filePath = path.join(this.basePath, 'uploads', fileName);
 
-        // Move file from temp to uploads directory
         await fs.rename(file.path, filePath);
 
-        // Store file metadata
         const metadata = {
             id: uniqueId,
             originalName: file.originalname,

@@ -15,7 +15,7 @@ const upload = multer({
         fileSize: 10 * 1024 * 1024 // 10MB
     },
     fileFilter: (req, file, cb) => {
-        const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        const allowedTypes = config.fileUpload.allowedMimeTypes;
         if (allowedTypes.includes(file.mimetype)) {
             cb(null, true);
             logger.info(`File type validated: ${file.mimetype}`);
